@@ -1,0 +1,16 @@
+.git
+.venv
+node_modules
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+backend/.venv
+frontend/node_modules
+frontend/dist
+reports/
+*.pdf
+test_*.py
+test.txt

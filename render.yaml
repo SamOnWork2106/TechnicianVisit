@@ -1,0 +1,37 @@
+# ==============================================================================
+# IntelliGreen Technologies Field Service — Render Free Tier Blueprint
+# 100% Free Single-Service Deployment (FastAPI + React PWA together)
+# ==============================================================================
+services:
+  - type: web
+    name: intelligreen-portal
+    runtime: python
+    region: oregon
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "cd backend && python -m uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: MANAGER_EMAIL
+        value: shikhar@intelligreentech.com
+      - key: COMPANY_EMAIL
+        value: info@intelligreentech.com
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_USE_SSL
+        value: "false"
+      - key: SMTP_FROM_NAME
+        value: "IntelliGreen Technologies Field Service"
+      - key: SMTP_EMAIL
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
