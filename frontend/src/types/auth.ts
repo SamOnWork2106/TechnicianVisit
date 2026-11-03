@@ -13,5 +13,7 @@ export interface Employee {
 export interface LoginResponse {
   success: boolean;
   message: string;
+  token?: string;
+  tokenType?: string;
   employee?: Employee;
 }

@@ -1,7 +1,16 @@
+import html
 from datetime import datetime
+from typing import Any
 from app.models.commissioning import CommissioningReportRequest
 from app.models.ppm import PPMReportRequest
 from app.models.report import ReportRequest
+
+
+def _esc(val: Any) -> str:
+    """Escapes user input to prevent HTML Injection and XSS."""
+    if val is None:
+        return ""
+    return html.escape(str(val).strip())
 
 
 def generate_commissioning_html(report: CommissioningReportRequest) -> str:
@@ -9,16 +18,16 @@ def generate_commissioning_html(report: CommissioningReportRequest) -> str:
     comm_date = (
         report.commissioningDate.strftime("%d %b %Y")
         if hasattr(report.commissioningDate, "strftime")
-        else str(report.commissioningDate)
+        else _esc(report.commissioningDate)
     )
 
     sample_rows = ""
     for s in report.ionSamples:
         sample_rows += f"""
         <tr>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{s.sampleName}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{s.preStandard}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">{s.postReading}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{_esc(s.sampleName)}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{_esc(s.preStandard)}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center; font-weight: bold; color: #0f766e;">{_esc(s.postReading)}</td>
         </tr>
         """
 
@@ -27,13 +36,13 @@ def generate_commissioning_html(report: CommissioningReportRequest) -> str:
         sensor_rows += f"""
         <tr>
             <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{idx}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1;">{sensor.location}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: bold;">{sensor.macId}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1;">{_esc(sensor.location)}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; font-family: monospace; font-weight: bold;">{_esc(sensor.macId)}</td>
         </tr>
         """
 
     sensor_desc_html = (
-        f'<p style="font-size: 13px; color: #475569; margin: 4px 0 10px 0;">{report.sensorDescription}</p>'
+        f'<p style="font-size: 13px; color: #475569; margin: 4px 0 10px 0;">{_esc(report.sensorDescription)}</p>'
         if report.sensorDescription and report.sensorDescription.strip()
         else ""
     )
@@ -113,13 +122,13 @@ td {{
     <div class="content">
         <div class="card">
             <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f766e;">Project & Installation Information</h3>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Project:</b> {report.client.project}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Client:</b> {report.client.clientName}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Location:</b> {report.client.location}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Client Rep:</b> {report.client.clientRepresentative} ({report.client.contactNo})</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Model Installed:</b> {report.description}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Project:</b> {_esc(report.client.project)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Client:</b> {_esc(report.client.clientName)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Location:</b> {_esc(report.client.location)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Client Rep:</b> {_esc(report.client.clientRepresentative)} ({_esc(report.client.contactNo)})</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Model Installed:</b> {_esc(report.description)}</p>
             <p style="margin: 4px 0; font-size: 13px;"><b>Commissioning Date:</b> {comm_date}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Technician:</b> {report.installer.contactPerson} ({report.installer.contactNo})</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Technician:</b> {_esc(report.installer.contactPerson)} ({_esc(report.installer.contactNo)})</p>
             <p style="margin: 4px 0; font-size: 13px;"><b>Submitted At:</b> {submitted_at}</p>
         </div>
 
@@ -172,18 +181,18 @@ def generate_ppm_html(report: PPMReportRequest) -> str:
     current_ppm = (
         report.ppmInfo.currentPpm.strftime("%d %b %Y")
         if hasattr(report.ppmInfo.currentPpm, "strftime")
-        else str(report.ppmInfo.currentPpm)
+        else _esc(report.ppmInfo.currentPpm)
     )
 
     check_rows = ""
     for item in report.checkList:
-        condition_badge = f'<span style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 2px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #a7f3d0;">{item.condition}</span>'
+        condition_badge = f'<span style="background-color: #ecfdf5; color: #065f46; font-weight: bold; padding: 2px 8px; border-radius: 4px; font-size: 12px; border: 1px solid #a7f3d0;">{_esc(item.condition)}</span>'
         check_rows += f"""
         <tr>
             <td style="padding: 8px; border: 1px solid #cbd5e1; text-align: center;">{item.sn}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 500;">{item.checkList}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; font-weight: 500;">{_esc(item.checkList)}</td>
             <td style="padding: 8px; border: 1px solid #cbd5e1;">{condition_badge}</td>
-            <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 12px;">{item.actionTaken or '-'}</td>
+            <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 12px;">{_esc(item.actionTaken) or '-'}</td>
         </tr>
         """
 
@@ -273,12 +282,12 @@ td {{
     <div class="content">
         <div class="card">
             <h3 style="margin: 0 0 10px 0; font-size: 15px; color: #0f766e;">Service & Equipment Summary</h3>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Client:</b> {report.project.client}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Location:</b> {report.project.location}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>PA Details:</b> {report.equipment.paDetails}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>IAQ Monitor Details:</b> {report.equipment.iaqMonitorDetails}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Last PPM:</b> {report.ppmInfo.lastPpm} &nbsp;|&nbsp; <b>Current PPM:</b> {current_ppm}</p>
-            <p style="margin: 4px 0; font-size: 13px;"><b>Technician:</b> {report.signatures.technicianName} &nbsp;|&nbsp; <b>Client Rep:</b> {report.signatures.clientRepName}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Client:</b> {_esc(report.project.client)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Location:</b> {_esc(report.project.location)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>PA Details:</b> {_esc(report.equipment.paDetails)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>IAQ Monitor Details:</b> {_esc(report.equipment.iaqMonitorDetails)}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Last PPM:</b> {_esc(report.ppmInfo.lastPpm)} &nbsp;|&nbsp; <b>Current PPM:</b> {current_ppm}</p>
+            <p style="margin: 4px 0; font-size: 13px;"><b>Technician:</b> {_esc(report.signatures.technicianName)} &nbsp;|&nbsp; <b>Client Rep:</b> {_esc(report.signatures.clientRepName)}</p>
             <p style="margin: 4px 0; font-size: 13px;"><b>Submitted At:</b> {submitted_at}</p>
         </div>
 
@@ -299,7 +308,7 @@ td {{
 
         <div class="card" style="margin-top: 20px;">
             <h4 style="margin: 0 0 6px 0; font-size: 14px; color: #0f766e;">Client's Remark / Feedback:</h4>
-            <p style="margin: 0; font-size: 13px; color: #334155;">{report.signatures.clientFeedback or 'No specific feedback provided.'}</p>
+            <p style="margin: 0; font-size: 13px; color: #334155;">{_esc(report.signatures.clientFeedback) or 'No specific feedback provided.'}</p>
         </div>
     </div>
 
@@ -322,12 +331,12 @@ def generate_html(report: ReportRequest) -> str:
         visit_rows += f"""
         <tr>
             <td>{index}</td>
-            <td>{visit.clientName}</td>
-            <td>{visit.personMet}</td>
-            <td>{visit.designation}</td>
-            <td>{visit.clientPhoneNumber}</td>
-            <td>{visit.discussionSummary}</td>
-            <td>{visit.nextAction}</td>
+            <td>{_esc(visit.clientName)}</td>
+            <td>{_esc(visit.personMet)}</td>
+            <td>{_esc(visit.designation)}</td>
+            <td>{_esc(visit.clientPhoneNumber)}</td>
+            <td>{_esc(visit.discussionSummary)}</td>
+            <td>{_esc(visit.nextAction)}</td>
         </tr>
         """
     return f"""
@@ -351,83 +360,35 @@ th,td {{
 }}
 
 th {{
-    background:#0f766e;
-    color:white;
-}}
-
-.section {{
-    margin-top:25px;
+    background-color:#eee;
 }}
 </style>
 </head>
-
 <body>
 
-<div style="
-    background:#0f766e;
-    color:white;
-    padding:20px;
-    text-align:center;
-    border-radius:8px;
-">
-
-<h2>INTELLIGREEN TECHNOLOGIES</h2>
-
-<h3>Daily Sales Visit Report</h3>
-
-</div>
-
-<h3>Employee Information</h3>
-
-<p><b>Employee:</b> {report.employee.employeeName}</p>
-<p><b>Employee ID:</b> {report.employee.employeeId}</p>
-<p><b>Date:</b> {report.employee.date}</p>
-<p><strong>Submitted At:</strong> {submitted_at}</p>
-<p><b>City:</b> {report.employee.city}</p>
-
-<div class="section">
-
-<h3>Customer Visits</h3>
+<h2>Daily Sales Visit Report</h2>
+<p><b>Employee ID:</b> {_esc(report.employee.employeeId)}</p>
+<p><b>Employee Name:</b> {_esc(report.employee.employeeName)}</p>
+<p><b>Date:</b> {_esc(report.employee.date)}</p>
+<p><b>Submitted At:</b> {submitted_at}</p>
 
 <table>
-
 <tr>
 <th>#</th>
-<th>Client</th>
+<th>Client Name</th>
 <th>Person Met</th>
 <th>Designation</th>
 <th>Phone Number</th>
-<th>Discussion</th>
+<th>Discussion Summary</th>
 <th>Next Action</th>
 </tr>
-
 {visit_rows}
-
 </table>
 
-</div>
-
-<div class="section">
-
-<h3>Day Summary</h3>
-
-<p><b>Key Win:</b> {report.daySummary.keyWin}</p>
-
-<p><b>Challenges:</b> {report.daySummary.challenges}</p>
-
-<p><b>Remarks:</b> {report.daySummary.otherRemarks}</p>
-
-</div>
-
-<div class="section">
-
-<h3>AI Summary</h3>
-
-<p>{report.aiSummary}</p>
-
-</div>
+<p><b>Key Win:</b> {_esc(report.employee.keyWin)}</p>
+<p><b>Challenges:</b> {_esc(report.employee.challenges)}</p>
+<p><b>Other Remarks:</b> {_esc(report.employee.otherRemarks)}</p>
 
 </body>
-
 </html>
 """

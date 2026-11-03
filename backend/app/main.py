@@ -1,5 +1,6 @@
+import os
 from pathlib import Path
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -8,14 +9,29 @@ from app.api.login import router as login_router
 from app.api.summary import router as summary_router
 from app.api.report import router as report_router
 
+is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
+
 app = FastAPI(
     title="IntelliGreen Field Technician Portal",
     description="Standalone Field Service & Air Quality Reporting Platform",
-    version="2.0.0"
+    version="2.0.0",
+    docs_url=None if is_production else "/docs",
+    redoc_url=None if is_production else "/redoc",
+    openapi_url=None if is_production else "/openapi.json",
 )
 
-# CORS configuration to support local development (e.g. Vite on port 5173) and cloud deployments
-# CORS configuration
+# Enforce Essential HTTP Security Headers Middleware
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return response
+
+
+# Strict CORS configuration
 origins = [
     "http://localhost:5173",
     "http://localhost:3000",
@@ -36,30 +52,15 @@ app.include_router(login_router)
 app.include_router(summary_router)
 app.include_router(report_router)
 
-from app.api.report import get_smtp_status, trigger_smtp_test, get_supabase_status
+from app.api.report import get_smtp_status, get_supabase_status
 
 @app.get("/api/smtp-status")
 @app.get("/api/smtp-status/")
-@app.get("/smtp-status")
-@app.get("/smtp-status/")
 def direct_smtp_status():
     return get_smtp_status()
 
-@app.get("/api/test-smtp")
-@app.get("/api/test-smtp/")
-@app.get("/test-smtp")
-@app.get("/test-smtp/")
-@app.post("/api/test-smtp")
-@app.post("/api/test-smtp/")
-@app.post("/test-smtp")
-@app.post("/test-smtp/")
-def direct_test_smtp():
-    return trigger_smtp_test()
-
 @app.get("/api/supabase-status")
 @app.get("/api/supabase-status/")
-@app.get("/supabase-status")
-@app.get("/supabase-status/")
 def direct_supabase_status():
     return get_supabase_status()
 

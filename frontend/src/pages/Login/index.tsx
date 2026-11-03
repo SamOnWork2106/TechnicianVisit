@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { login } from "../../services/authService";
 import type { LoginRequest } from "../../types/auth";
@@ -11,7 +12,6 @@ export default function LoginPage() {
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { isSubmitting },
   } = useForm<LoginRequest>({
     defaultValues: {
@@ -20,29 +20,36 @@ export default function LoginPage() {
     },
   });
 
-  const { setEmployee } = useAuth();
+  const { setSession, employee, token } = useAuth();
   const navigate = useNavigate();
+
+  // If already authenticated with a valid session, redirect directly to report portal
+  useEffect(() => {
+    if (employee && token) {
+      navigate("/report", { replace: true });
+    }
+  }, [employee, token, navigate]);
 
   const onSubmit = async (data: LoginRequest) => {
     try {
       const response = await login(data);
 
-      if (response.success && response.employee) {
-        setEmployee(response.employee);
+      if (response.success && response.employee && response.token) {
+        setSession(response.employee, response.token);
         toast.success(`Welcome back, ${response.employee.name}!`);
         navigate("/report");
       } else {
-        toast.error("Invalid Employee ID or Password");
+        toast.error(response.message || "Invalid Employee ID or Password");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error("Login failed. Make sure backend is running.");
+      const detail = error.response?.data?.detail;
+      if (error.response?.status === 429) {
+        toast.error(detail || "Too many failed attempts. Please wait 1 minute.");
+      } else {
+        toast.error(detail || "Login failed. Make sure backend is running.");
+      }
     }
-  };
-
-  const handleQuickFill = (id: string, pass: string) => {
-    setValue("employeeId", id);
-    setValue("password", pass);
   };
 
   return (
@@ -82,7 +89,7 @@ export default function LoginPage() {
             </label>
             <input
               type="text"
-              placeholder="e.g. LokendraS"
+              placeholder="Enter Employee ID"
               {...register("employeeId", { required: true })}
               className="w-full border border-slate-300 rounded-xl p-3 text-sm font-medium focus:ring-2 focus:ring-teal-600 focus:border-teal-600 outline-none transition"
             />
@@ -115,32 +122,6 @@ export default function LoginPage() {
               </>
             )}
           </button>
-
-          {/* Quick Technician Credentials Helper */}
-          <div className="pt-2 border-t border-slate-100">
-            <p className="text-[11px] font-semibold text-slate-500 mb-2 text-center">
-              Quick Technician Demo Logins:
-            </p>
-            <div className="grid grid-cols-2 gap-2 text-[11px]">
-              <button
-                type="button"
-                onClick={() => handleQuickFill("LokendraS", "8005575735")}
-                className="p-1.5 px-2 bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-lg text-left transition cursor-pointer"
-              >
-                <div className="font-bold text-slate-800">Lokendra Singh</div>
-                <div className="text-[10px] text-slate-500 font-mono">LokendraS</div>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickFill("HimanshuA", "7303032596")}
-                className="p-1.5 px-2 bg-slate-50 hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-lg text-left transition cursor-pointer"
-              >
-                <div className="font-bold text-slate-800">Himanshu Agarwal</div>
-                <div className="text-[10px] text-slate-500 font-mono">HimanshuA</div>
-              </button>
-            </div>
-          </div>
         </form>
       </div>
 

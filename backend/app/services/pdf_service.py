@@ -31,6 +31,18 @@ BORDER_COLOR = colors.HexColor("#334155")
 LIGHT_BG = colors.HexColor("#f8fafc")
 
 
+def _clean_str(text) -> str:
+    """Escapes XML entities (&, <, >) to avoid breaking ReportLab Paragraph parser."""
+    if text is None:
+        return ""
+    return (
+        str(text)
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+    )
+
+
 def _get_custom_styles():
     styles = getSampleStyleSheet()
 
@@ -209,10 +221,10 @@ def generate_commissioning_pdf(report: CommissioningReportRequest) -> Path:
     # General info table
     gen_data = [
         [
-            Paragraph(f"<b>Description:</b> {report.description}", styles["TableCell"]),
+            Paragraph(f"<b>Description:</b> {_clean_str(report.description)}", styles["TableCell"]),
         ],
         [
-            Paragraph(f"<b>Commissioning Date:</b> {report.commissioningDate.strftime('%d.%m.%Y') if hasattr(report.commissioningDate, 'strftime') else report.commissioningDate}", styles["TableCell"]),
+            Paragraph(f"<b>Commissioning Date:</b> {report.commissioningDate.strftime('%d.%m.%Y') if hasattr(report.commissioningDate, 'strftime') else _clean_str(report.commissioningDate)}", styles["TableCell"]),
         ],
     ]
     gen_table = Table(gen_data, colWidths=[doc.width])
@@ -234,14 +246,14 @@ def generate_commissioning_pdf(report: CommissioningReportRequest) -> Path:
     inst_data = [
         [
             Paragraph(
-                f"<b>Installer:</b><br/>{report.installer.installerName}<br/>"
-                f"<b>Company address:</b> {report.installer.companyAddress}<br/>"
-                f"<b>Tel. no.:</b> {report.installer.telNo} &nbsp;&nbsp;&nbsp;&nbsp; <b>Email:</b> {report.installer.email}",
+                f"<b>Installer:</b><br/>{_clean_str(report.installer.installerName)}<br/>"
+                f"<b>Company address:</b> {_clean_str(report.installer.companyAddress)}<br/>"
+                f"<b>Tel. no.:</b> {_clean_str(report.installer.telNo)} &nbsp;&nbsp;&nbsp;&nbsp; <b>Email:</b> {_clean_str(report.installer.email)}",
                 styles["TableCell"],
             ),
             Paragraph(
-                f"<b>Contact person:</b> {report.installer.contactPerson}<br/><br/>"
-                f"<b>Contact No.:</b> {report.installer.contactNo}",
+                f"<b>Contact person:</b> {_clean_str(report.installer.contactPerson)}<br/><br/>"
+                f"<b>Contact No.:</b> {_clean_str(report.installer.contactNo)}",
                 styles["TableCell"],
             ),
         ]
@@ -263,23 +275,23 @@ def generate_commissioning_pdf(report: CommissioningReportRequest) -> Path:
 
     client_data = [
         [
-            Paragraph(f"<b>Client:</b> {report.client.clientName}", styles["TableCell"]),
+            Paragraph(f"<b>Client:</b> {_clean_str(report.client.clientName)}", styles["TableCell"]),
             "",
         ],
         [
-            Paragraph(f"<b>Project:</b> {report.client.project}", styles["TableCell"]),
-            Paragraph(f"<b>Client Representative:</b> {report.client.clientRepresentative}", styles["TableCell"]),
+            Paragraph(f"<b>Project:</b> {_clean_str(report.client.project)}", styles["TableCell"]),
+            Paragraph(f"<b>Client Representative:</b> {_clean_str(report.client.clientRepresentative)}", styles["TableCell"]),
         ],
         [
-            Paragraph(f"<b>Location:</b> {report.client.location}", styles["TableCell"]),
-            Paragraph(f"<b>Contact No.:</b> {report.client.contactNo}", styles["TableCell"]),
+            Paragraph(f"<b>Location:</b> {_clean_str(report.client.location)}", styles["TableCell"]),
+            Paragraph(f"<b>Contact No.:</b> {_clean_str(report.client.contactNo)}", styles["TableCell"]),
         ],
         [
-            Paragraph(f"<b>Tel. no.:</b> {report.client.telNo}", styles["TableCell"]),
-            Paragraph(f"<b>Email:</b> {report.client.email}", styles["TableCell"]),
+            Paragraph(f"<b>Tel. no.:</b> {_clean_str(report.client.telNo)}", styles["TableCell"]),
+            Paragraph(f"<b>Email:</b> {_clean_str(report.client.email)}", styles["TableCell"]),
         ],
         [
-            Paragraph(f"<b>Client Address:</b> {report.client.clientAddress}", styles["TableCell"]),
+            Paragraph(f"<b>Client Address:</b> {_clean_str(report.client.clientAddress)}", styles["TableCell"]),
             "",
         ],
     ]
@@ -551,18 +563,18 @@ def generate_ppm_pdf(report: PPMReportRequest) -> Path:
         ],
         [
             Paragraph(
-                f"<b>PA Details:</b><br/>{report.equipment.paDetails}<br/><br/>"
-                f"<b>IAQ Monitor Details:</b><br/>{report.equipment.iaqMonitorDetails}",
+                f"<b>PA Details:</b><br/>{_clean_str(report.equipment.paDetails)}<br/><br/>"
+                f"<b>IAQ Monitor Details:</b><br/>{_clean_str(report.equipment.iaqMonitorDetails)}",
                 styles["TableCell"],
             ),
             Paragraph(
-                f"<b>Client:</b><br/>{report.project.client}<br/><br/>"
-                f"<b>Location:</b><br/>{report.project.location}",
+                f"<b>Client:</b><br/>{_clean_str(report.project.client)}<br/><br/>"
+                f"<b>Location:</b><br/>{_clean_str(report.project.location)}",
                 styles["TableCell"],
             ),
             Paragraph(
-                f"<b>Last PPM:</b> {report.ppmInfo.lastPpm}<br/><br/>"
-                f"<b>Current PPM:</b> {report.ppmInfo.currentPpm.strftime('%d.%m.%Y') if hasattr(report.ppmInfo.currentPpm, 'strftime') else report.ppmInfo.currentPpm}",
+                f"<b>Last PPM:</b> {_clean_str(report.ppmInfo.lastPpm)}<br/><br/>"
+                f"<b>Current PPM:</b> {report.ppmInfo.currentPpm.strftime('%d.%m.%Y') if hasattr(report.ppmInfo.currentPpm, 'strftime') else _clean_str(report.ppmInfo.currentPpm)}",
                 styles["TableCell"],
             ),
         ],
@@ -601,9 +613,9 @@ def generate_ppm_pdf(report: PPMReportRequest) -> Path:
     for item in report.checkList:
         check_rows.append([
             Paragraph(str(item.sn), styles["TableCellCenter"]),
-            Paragraph(item.checkList, styles["TableCell"]),
-            Paragraph(item.condition or "-", styles["TableCellBold"]),
-            Paragraph(item.actionTaken or "-", styles["TableCell"]),
+            Paragraph(_clean_str(item.checkList), styles["TableCell"]),
+            Paragraph(_clean_str(item.condition or "-"), styles["TableCellBold"]),
+            Paragraph(_clean_str(item.actionTaken or "-"), styles["TableCell"]),
         ])
 
     check_table = Table(
@@ -634,19 +646,19 @@ def generate_ppm_pdf(report: PPMReportRequest) -> Path:
         ],
         [
             Paragraph(
-                f"<b>Technician's Name:</b> {report.signatures.technicianName}<br/><br/>"
+                f"<b>Technician's Name:</b> {_clean_str(report.signatures.technicianName)}<br/><br/>"
                 f"<b>Signature:</b> [Signed Digitally by Technician]",
                 styles["TableCell"],
             ),
             Paragraph(
-                f"<b>Name:</b> {report.signatures.clientRepName}<br/><br/>"
+                f"<b>Name:</b> {_clean_str(report.signatures.clientRepName)}<br/><br/>"
                 f"<b>Signature:</b> [Acknowledged On-Site]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>:Stamp</b>",
                 styles["TableCell"],
             ),
         ],
         [
             Paragraph(
-                f"<b>Client's Remark/Feedback:</b><br/>{report.signatures.clientFeedback or 'No specific remarks.'}",
+                f"<b>Client's Remark/Feedback:</b><br/>{_clean_str(report.signatures.clientFeedback or 'No specific remarks.')}",
                 styles["TableCell"],
             ),
             "",

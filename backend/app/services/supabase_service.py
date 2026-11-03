@@ -61,15 +61,13 @@ def test_supabase_connection() -> Dict[str, Any]:
         }
 
     try:
-        # Check querying the technicians or commissioning_reports table
-        res = client.table("technicians").select("username, full_name, role").limit(5).execute()
+        # Check database connectivity safely without exposing any sensitive user data
+        client.table("commissioning_reports").select("id").limit(1).execute()
         return {
             "configured": True,
             "connected": True,
-            "message": f"Successfully connected to Supabase database at {settings.SUPABASE_URL}!",
-            "url": settings.SUPABASE_URL,
-            "tables": ["technicians", "commissioning_reports", "ppm_reports"],
-            "technicians": res.data or [],
+            "message": "Successfully connected to Supabase database.",
+            "tables": ["commissioning_reports", "ppm_reports"],
         }
     except Exception as e:
         # If the table doesn't exist yet, give a helpful prompt to run supabase_schema.sql

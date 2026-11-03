@@ -16,4 +16,6 @@ class EmployeeResponse(BaseModel):
 class LoginResponse(BaseModel):
     success: bool
     message: str
+    token: str | None = None
+    tokenType: str = "bearer"
     employee: EmployeeResponse | None = None

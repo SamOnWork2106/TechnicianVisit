@@ -15,11 +15,11 @@ export default function PageHeader({
   onSelectTab,
 }: Props) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { employee, setEmployee } = useAuth();
+  const { employee, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    setEmployee(null);
+    logout();
     navigate("/");
   };
 

@@ -42,7 +42,7 @@ export default function InstallerSection({ register }: Props) {
           </label>
           <input
             type="text"
-            placeholder="e.g. Mr. Lokendra Shekhwat"
+            placeholder="e.g. Field Technician Name"
             {...register("installer.contactPerson", { required: true })}
             className="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-600 outline-none"
           />

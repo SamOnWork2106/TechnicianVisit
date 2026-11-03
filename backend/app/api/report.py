@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Response
+from fastapi import APIRouter, HTTPException, Response, Depends
 from pathlib import Path
 import smtplib
 
 from app.config.settings import settings
+from app.core.security import get_current_technician
 
 from app.models.report import ReportRequest, SubmitResponse
 from app.models.commissioning import (
@@ -49,13 +50,15 @@ router = APIRouter(
     "/commissioning/generate-summary",
     response_model=SummaryResponse,
 )
-def generate_commissioning_ai_summary(request: CommissioningSummaryRequest):
+def generate_commissioning_ai_summary(
+    request: CommissioningSummaryRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     try:
         prompt = build_commissioning_summary_prompt(request)
         summary = generate_summary(prompt)
         return SummaryResponse(success=True, summary=summary)
-    except Exception as e:
-        # Provide a high-quality fallback technical summary if Gemini API key is not configured
+    except Exception:
         fallback_summary = (
             f"Commissioning of {request.description} at {request.client.project} ({request.client.location}) "
             f"for {request.client.clientName} has been completed successfully. Ion concentration readings recorded across "
@@ -72,12 +75,18 @@ def generate_commissioning_ai_summary(request: CommissioningSummaryRequest):
     "/commissioning/submit",
     response_model=SubmitResponse,
 )
-def submit_commissioning(report: CommissioningReportRequest):
+def submit_commissioning(
+    report: CommissioningReportRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     return process_commissioning_report(report)
 
 
 @router.post("/commissioning/download-pdf")
-def download_commissioning_pdf(report: CommissioningReportRequest):
+def download_commissioning_pdf(
+    report: CommissioningReportRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     pdf_path: Path | None = None
     try:
         pdf_path = generate_commissioning_pdf(report)
@@ -102,13 +111,15 @@ def download_commissioning_pdf(report: CommissioningReportRequest):
     "/ppm/generate-summary",
     response_model=SummaryResponse,
 )
-def generate_ppm_ai_summary(request: PPMSummaryRequest):
+def generate_ppm_ai_summary(
+    request: PPMSummaryRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     try:
         prompt = build_ppm_summary_prompt(request)
         summary = generate_summary(prompt)
         return SummaryResponse(success=True, summary=summary)
-    except Exception as e:
-        # Fallback technical summary if Gemini API key is not configured
+    except Exception:
         fallback_summary = (
             f"Periodic Preventive Maintenance (PPM) for {request.project.client} at {request.project.location} "
             f"conducted on {request.ppmInfo.currentPpm}. Comprehensive inspection of {request.equipment.paDetails} "
@@ -124,12 +135,18 @@ def generate_ppm_ai_summary(request: PPMSummaryRequest):
     "/ppm/submit",
     response_model=SubmitResponse,
 )
-def submit_ppm(report: PPMReportRequest):
+def submit_ppm(
+    report: PPMReportRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     return process_ppm_report(report)
 
 
 @router.post("/ppm/download-pdf")
-def download_ppm_pdf(report: PPMReportRequest):
+def download_ppm_pdf(
+    report: PPMReportRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     pdf_path: Path | None = None
     try:
         pdf_path = generate_ppm_pdf(report)
@@ -154,7 +171,10 @@ def download_ppm_pdf(report: PPMReportRequest):
     "/submit-report",
     response_model=SubmitResponse,
 )
-def submit_report(report: ReportRequest):
+def submit_report(
+    report: ReportRequest,
+    current_user: dict = Depends(get_current_technician),
+):
     return process_report(report)
 
 
@@ -165,56 +185,34 @@ def submit_report(report: ReportRequest):
 @router.get("/smtp-status")
 @router.get("/smtp-status/")
 def get_smtp_status():
-    pwd = settings.SMTP_PASSWORD
-    configured = bool(settings.SMTP_EMAIL and pwd)
-    pwd_len = len(pwd) if pwd else 0
-    if pwd_len == 16:
-        pwd_preview = "Configured (16 characters - Standard Google App Password)"
-    elif pwd_len > 0:
-        pwd_preview = f"Configured ({pwd_len} characters - Note: Google App Passwords are usually 16 characters)"
-    else:
-        pwd_preview = "Not configured"
-
+    """
+    Sanitized SMTP status check. Never exposes passwords, internal file paths,
+    or sensitive server configuration.
+    """
+    configured = bool(settings.SMTP_EMAIL and settings.SMTP_PASSWORD)
     return {
         "status": "online",
         "configured": configured,
         "host": settings.SMTP_HOST,
         "port": settings.SMTP_PORT,
-        "senderEmail": settings.SMTP_EMAIL or "",
-        "hasPassword": bool(pwd),
-        "passwordLength": pwd_len,
-        "passwordStatus": pwd_preview,
-        "managerEmail": settings.MANAGER_EMAIL,
-        "companyEmail": settings.COMPANY_EMAIL,
         "fromName": settings.SMTP_FROM_NAME,
-        "envFile": "backend/.env",
-        "instructions": (
-            "To send report emails for free, add your Google Workspace/Gmail sender email and "
-            "16-letter App Password in backend/.env under SMTP_EMAIL and SMTP_PASSWORD and save (Ctrl+S)."
-            if not configured
-            else f"SMTP is configured to automatically dispatch reports to {settings.MANAGER_EMAIL} and {settings.COMPANY_EMAIL}."
-        ),
     }
 
 
-@router.get("/test-smtp")
-@router.get("/test-smtp/")
 @router.post("/test-smtp")
 @router.post("/test-smtp/")
-def trigger_smtp_test():
+def trigger_smtp_test(current_user: dict = Depends(get_current_technician)):
+    """
+    Protected diagnostic test. Only authenticated technicians can trigger SMTP tests.
+    """
     sender_email = settings.SMTP_EMAIL.strip()
     sender_pass = settings.SMTP_PASSWORD.strip()
 
     if not (sender_email and sender_pass):
         raise HTTPException(
             status_code=400,
-            detail="SMTP credentials are not configured in backend/.env. Please enter SMTP_EMAIL and SMTP_PASSWORD.",
+            detail="SMTP credentials are not configured in backend/.env.",
         )
-
-    pwd_len = len(sender_pass)
-    hint = ""
-    if pwd_len == 15:
-        hint = " (Warning: Password is 15 characters; Google App Passwords are 16 characters - check if 1 character was missed)"
 
     try:
         if settings.SMTP_USE_SSL or settings.SMTP_PORT == 465:
@@ -228,33 +226,12 @@ def trigger_smtp_test():
                 server.login(sender_email, sender_pass)
         return {
             "success": True,
-            "message": f"SMTP authentication succeeded! Connected to {settings.SMTP_HOST}:{settings.SMTP_PORT} as {sender_email}.",
-            "recipients": [settings.MANAGER_EMAIL, settings.COMPANY_EMAIL],
+            "message": f"SMTP authentication succeeded! Connected to {settings.SMTP_HOST}:{settings.SMTP_PORT}.",
         }
-    except smtplib.SMTPAuthenticationError as auth_err:
-        raise HTTPException(
-            status_code=401,
-            detail=(
-                f"Google SMTP Authentication Failed (535 Bad Credentials). "
-                f"Username: '{sender_email}', Password length: {pwd_len} chars{hint}. "
-                f"Ensure you are using a 16-letter Google App Password from https://myaccount.google.com/apppasswords "
-                f"(not your personal login password). Details: {str(auth_err)}"
-            ),
-        )
-    except smtplib.SMTPServerDisconnected as disc_err:
-        raise HTTPException(
-            status_code=401,
-            detail=(
-                f"Google SMTP rejected credentials and closed the connection (535 Bad Credentials). "
-                f"Username: '{sender_email}', Password length: {pwd_len} characters{hint}. "
-                f"Google accounts require a 16-letter App Password from https://myaccount.google.com/apppasswords. "
-                f"Please verify your 16-letter code and save in backend/.env. Details: {str(disc_err)}"
-            ),
-        )
     except Exception as e:
         raise HTTPException(
             status_code=500,
-            detail=f"SMTP connection error: {str(e)}{hint}",
+            detail=f"SMTP connection test failed: {str(e)}",
         )
 
 
@@ -266,15 +243,18 @@ def trigger_smtp_test():
 @router.get("/supabase-status/")
 def get_supabase_status():
     """
-    Checks Supabase configuration and connectivity.
+    Sanitized Supabase health check.
     """
     return test_supabase_connection()
 
 
 @router.get("/commissioning/history")
-def get_commissioning_history(limit: int = 50):
+def get_commissioning_history(
+    limit: int = 50,
+    current_user: dict = Depends(get_current_technician),
+):
     """
-    Retrieves stored commissioning reports from Supabase.
+    Retrieves stored commissioning reports from Supabase. (Requires authentication)
     """
     return {
         "success": True,
@@ -283,9 +263,12 @@ def get_commissioning_history(limit: int = 50):
 
 
 @router.get("/ppm/history")
-def get_ppm_history(limit: int = 50):
+def get_ppm_history(
+    limit: int = 50,
+    current_user: dict = Depends(get_current_technician),
+):
     """
-    Retrieves stored PPM maintenance reports from Supabase.
+    Retrieves stored PPM maintenance reports from Supabase. (Requires authentication)
     """
     return {
         "success": True,

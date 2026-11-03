@@ -37,7 +37,7 @@ export default function PPMSignaturesSection({ register }: Props) {
             </label>
             <input
               type="text"
-              placeholder="e.g. Lokendra Singh"
+              placeholder="e.g. Field Technician Name"
               {...register("signatures.technicianName", { required: true })}
               className="w-full border border-slate-300 rounded-lg p-2.5 text-sm font-medium focus:ring-2 focus:ring-teal-600 outline-none"
             />
