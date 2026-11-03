@@ -85,10 +85,12 @@ def process_commissioning_report(report: CommissioningReportRequest) -> SubmitRe
 
         if email_sent:
             msg = f"Commissioning Report for {report.client.project} submitted and dispatched to: {', '.join(recipients)}."
-        elif not (settings.SMTP_EMAIL and settings.SMTP_PASSWORD):
-            msg = f"Commissioning Report for {report.client.project} submitted and PDF generated. Note: Email skipped (SMTP_EMAIL / SMTP_PASSWORD not saved in backend/.env)."
+        elif email_err_msg:
+            msg = f"Commissioning Report for {report.client.project} submitted and PDF generated. Note: Email delivery failed ({email_err_msg})."
+        elif not (settings.SMTP_EMAIL and settings.SMTP_PASSWORD) and not settings.RESEND_API_KEY and not settings.BREVO_API_KEY:
+            msg = f"Commissioning Report for {report.client.project} submitted and PDF generated. Note: Email skipped (No email credentials configured in environment)."
         else:
-            msg = f"Commissioning Report for {report.client.project} submitted and PDF generated. Note: SMTP connection failed ({email_err_msg or 'check Gmail App Password'})."
+            msg = f"Commissioning Report for {report.client.project} submitted and PDF generated. Note: Email delivery skipped."
 
         return SubmitResponse(
             success=True,
@@ -166,10 +168,12 @@ def process_ppm_report(report: PPMReportRequest) -> SubmitResponse:
 
         if email_sent:
             msg = f"PPM Check List report for {report.project.client} submitted and dispatched to: {', '.join(recipients)}."
-        elif not (settings.SMTP_EMAIL and settings.SMTP_PASSWORD):
-            msg = f"PPM Check List report for {report.project.client} submitted and PDF generated. Note: Email skipped (SMTP_EMAIL / SMTP_PASSWORD not saved in backend/.env)."
+        elif email_err_msg:
+            msg = f"PPM Check List report for {report.project.client} submitted and PDF generated. Note: Email delivery failed ({email_err_msg})."
+        elif not (settings.SMTP_EMAIL and settings.SMTP_PASSWORD) and not settings.RESEND_API_KEY and not settings.BREVO_API_KEY:
+            msg = f"PPM Check List report for {report.project.client} submitted and PDF generated. Note: Email skipped (No email credentials configured in environment)."
         else:
-            msg = f"PPM Check List report for {report.project.client} submitted and PDF generated. Note: SMTP connection failed ({email_err_msg or 'check Gmail App Password'})."
+            msg = f"PPM Check List report for {report.project.client} submitted and PDF generated. Note: Email delivery skipped."
 
         return SubmitResponse(
             success=True,

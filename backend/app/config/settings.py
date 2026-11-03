@@ -84,9 +84,20 @@ class Settings:
         return val in ("true", "1", "yes")
 
     @property
+    def EMAIL_PROVIDER(self) -> str:
+        reload_environment()
+        return os.getenv("EMAIL_PROVIDER", "").strip().strip('"').strip("'").lower()
+
+    @property
     def RESEND_API_KEY(self) -> str:
         reload_environment()
         val = os.getenv("RESEND_API_KEY", "")
+        return val.strip().strip('"').strip("'") if val else ""
+
+    @property
+    def BREVO_API_KEY(self) -> str:
+        reload_environment()
+        val = os.getenv("BREVO_API_KEY", "")
         return val.strip().strip('"').strip("'") if val else ""
 
     @property

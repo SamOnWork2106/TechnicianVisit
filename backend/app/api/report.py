@@ -186,13 +186,22 @@ def submit_report(
 @router.get("/smtp-status/")
 def get_smtp_status():
     """
-    Sanitized SMTP status check. Never exposes passwords, internal file paths,
+    Sanitized email service status check. Never exposes passwords, internal file paths,
     or sensitive server configuration.
     """
-    configured = bool(settings.SMTP_EMAIL and settings.SMTP_PASSWORD)
+    smtp_configured = bool(settings.SMTP_EMAIL and settings.SMTP_PASSWORD)
+    resend_configured = bool(settings.RESEND_API_KEY)
+    brevo_configured = bool(settings.BREVO_API_KEY)
+    active_provider = settings.EMAIL_PROVIDER or (
+        "resend" if resend_configured and not smtp_configured else ("brevo" if brevo_configured and not smtp_configured else "smtp")
+    )
     return {
         "status": "online",
-        "configured": configured,
+        "configured": smtp_configured or resend_configured or brevo_configured,
+        "activeProvider": active_provider,
+        "smtpConfigured": smtp_configured,
+        "resendConfigured": resend_configured,
+        "brevoConfigured": brevo_configured,
         "host": settings.SMTP_HOST,
         "port": settings.SMTP_PORT,
         "fromName": settings.SMTP_FROM_NAME,
