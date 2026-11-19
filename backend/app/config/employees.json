@@ -1,12 +1,5 @@
 [
   {
-    "employeeId": "HimanshuA",
-    "password": "7303032596",
-    "name": "Himanshu Agarwal",
-    "managerEmail": "vikash@intelligreentech.com",
-    "region": "North"
-  },
-  {
     "employeeId": "LokendraS",
     "password": "8005575735",
     "name": "Lokendra Singh",
@@ -20,6 +13,7 @@
     "managerEmail": "vikash@intelligreentech.com",
     "region": "North"
   },
+
   {
     "employeeId": "PramodV",
     "password": "8368232804",
@@ -34,27 +28,7 @@
     "managerEmail": "vikash@intelligreentech.com",
     "region": "North"
   },
-  {
-    "employeeId": "RitikaC",
-    "password": "9990056957",
-    "name": "Ritika Choudhary",
-    "managerEmail": "vikash@intelligreentech.com",
-    "region": "North"
-  },
-  {
-    "employeeId": "BhawnaS",
-    "password": "8800208155",
-    "name": "Bhawna Shandilya",
-    "managerEmail": "vikash@intelligreentech.com",
-    "region": "North"
-  },
-  {
-    "employeeId": "VarnikaJ",
-    "password": "7011864736",
-    "name": "Varnika Jain",
-    "managerEmail": "vikash@intelligreentech.com",
-    "region": "North"
-  },
+  
   {
     "employeeId": "ShikharS",
     "password": "9559468808",
@@ -63,9 +37,9 @@
     "region": "North"
   },
   {
-    "employeeId": "PurvikIgt",
-    "password": "6360160840",
-    "name": "Pruvik Igt",
+    "employeeId": "Vicky",
+    "password": "8447672450",
+    "name": "Vicky Kumar",
     "managerEmail": "vikash@intelligreentech.com",
     "region": "North"
   }
