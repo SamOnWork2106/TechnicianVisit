@@ -11,7 +11,7 @@ export const COMMISSIONING_EXAMPLE_DATA: CommissioningForm = {
     companyAddress: "Unit No. COS/3L/Office/17, M3M Cosmopolitan, Sector 66, Gurgaon, Haryana 122002",
     telNo: "+91 124 4256862",
     email: "info@intelligreentech.com",
-    managerEmail: "shikhar@intelligreentech.com",
+    managerEmail: "vikash@intelligreentech.com",
   },
   client: {
     clientName: "Studiokon Ventures Private Limited",
@@ -105,7 +105,7 @@ export const INITIAL_PPM_DATA: PPMForm = {
   ppmInfo: {
     lastPpm: "",
     currentPpm: new Date().toISOString().split("T")[0],
-    managerEmail: "shikhar@intelligreentech.com",
+    managerEmail: "vikash@intelligreentech.com",
   },
   checkList: DEFAULT_PPM_CHECKLIST_ITEMS,
   signatures: {
@@ -128,7 +128,7 @@ export const SAMPLE_FILLED_PPM_DATA: PPMForm = {
   ppmInfo: {
     lastPpm: "28.05.2025",
     currentPpm: new Date().toISOString().split("T")[0],
-    managerEmail: "shikhar@intelligreentech.com",
+    managerEmail: "vikash@intelligreentech.com",
   },
   checkList: [
     {

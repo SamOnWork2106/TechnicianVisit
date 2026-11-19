@@ -29,8 +29,8 @@ class Settings:
     @property
     def MANAGER_EMAIL(self) -> str:
         reload_environment()
-        val = os.getenv("MANAGER_EMAIL", "shikhar@intelligreentech.com").strip().strip('"').strip("'")
-        return val or "shikhar@intelligreentech.com"
+        val = os.getenv("MANAGER_EMAIL", "vikash@intelligreentech.com").strip().strip('"').strip("'")
+        return val or "vikash@intelligreentech.com"
 
     @property
     def COMPANY_EMAIL(self) -> str:

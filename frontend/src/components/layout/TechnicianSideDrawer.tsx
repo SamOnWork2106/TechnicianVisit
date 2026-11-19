@@ -221,7 +221,7 @@ export default function TechnicianSideDrawer({
                   <div className="flex justify-between">
                     <span className="text-slate-500">Manager:</span>
                     <span className="font-mono font-semibold text-emerald-800">
-                      shikhar@intelligreentech.com
+                      vikash@intelligreentech.com
                     </span>
                   </div>
                   <div className="flex justify-between">

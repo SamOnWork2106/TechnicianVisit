@@ -71,7 +71,7 @@ export default function CommissioningReportForm() {
         companyAddress: "Unit No. COS/3L/Office/17, M3M Cosmopolitan, Sector 66, Gurgaon, Haryana 122002",
         telNo: "+91 124 4256862",
         email: "info@intelligreentech.com",
-        managerEmail: "shikhar@intelligreentech.com",
+        managerEmail: "vikash@intelligreentech.com",
       },
       client: {
         clientName: "",
@@ -127,7 +127,7 @@ export default function CommissioningReportForm() {
         state: {
           reportType: "IntelliGreen-IAQ Solution Commissioning Report",
           clientName: `${data.client.project} (${data.client.clientName})`,
-          managerEmail: "shikhar@intelligreentech.com",
+          managerEmail: "vikash@intelligreentech.com",
           companyEmail: "info@intelligreentech.com",
         },
       });

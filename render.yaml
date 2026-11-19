@@ -11,7 +11,7 @@ services:
     dockerfilePath: ./Dockerfile
     envVars:
       - key: MANAGER_EMAIL
-        value: shikhar@intelligreentech.com
+        value: vikash@intelligreentech.com
       - key: COMPANY_EMAIL
         value: info@intelligreentech.com
       - key: SMTP_HOST

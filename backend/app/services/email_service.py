@@ -162,7 +162,7 @@ def send_email(email_data: EmailData) -> bool:
 
     recipients = list(recipient_set)
     if not recipients:
-        recipients = [settings.MANAGER_EMAIL or "shikhar@intelligreentech.com"]
+        recipients = [settings.MANAGER_EMAIL or "vikash@intelligreentech.com"]
 
     provider = settings.EMAIL_PROVIDER.lower()
     is_render = os.getenv("RENDER") == "true" or os.getenv("RENDER_SERVICE_ID") is not None

@@ -140,7 +140,7 @@ export default function ServerStatusModal({ isOpen, onClose }: ServerStatusModal
               <div className="flex justify-between py-0.5">
                 <span className="text-slate-500">Manager Recipient:</span>
                 <span className="font-mono font-semibold text-teal-800">
-                  {smtpStatus?.managerEmail || "shikhar@intelligreentech.com"}
+                  {smtpStatus?.managerEmail || "vikash@intelligreentech.com"}
                 </span>
               </div>
               <div className="flex justify-between py-0.5">

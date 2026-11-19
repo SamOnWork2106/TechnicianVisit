@@ -12,7 +12,7 @@ class InstallerInfo(BaseModel):
     )
     telNo: str = "+91 124 4256862"
     email: EmailStr = "info@intelligreentech.com"
-    managerEmail: EmailStr = "shikhar@intelligreentech.com"
+    managerEmail: EmailStr = "vikash@intelligreentech.com"
 
 
 class ClientInfo(BaseModel):

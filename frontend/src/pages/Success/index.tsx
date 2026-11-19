@@ -58,7 +58,7 @@ export default function SuccessPage() {
               <div className="mt-1.5 space-y-1 font-mono text-xs font-bold text-teal-800 bg-white p-2.5 rounded-lg border border-slate-200">
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-teal-600"></span>
-                  <span>{state.managerEmail || "shikhar@intelligreentech.com"} (Manager)</span>
+                  <span>{state.managerEmail || "vikash@intelligreentech.com"} (Manager)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-teal-600"></span>

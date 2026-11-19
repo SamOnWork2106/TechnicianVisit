@@ -99,7 +99,7 @@ export default function PPMReportForm() {
         state: {
           reportType: "Periodic Preventive Maintenance (PPM) Check List",
           clientName: data.project.client,
-          managerEmail: "shikhar@intelligreentech.com",
+          managerEmail: "vikash@intelligreentech.com",
           companyEmail: "info@intelligreentech.com",
         },
       });

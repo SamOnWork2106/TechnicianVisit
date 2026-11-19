@@ -17,7 +17,7 @@ class PPMProjectDetails(BaseModel):
 class PPMDetails(BaseModel):
     lastPpm: str = "28.05.2025"
     currentPpm: date
-    managerEmail: EmailStr = "shikhar@intelligreentech.com"
+    managerEmail: EmailStr = "vikash@intelligreentech.com"
 
 
 class PPMChecklistItem(BaseModel):
