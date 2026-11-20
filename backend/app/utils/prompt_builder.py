@@ -7,12 +7,16 @@ def build_commissioning_summary_prompt(
     report: CommissioningReportRequest | CommissioningSummaryRequest,
 ) -> str:
     samples_text = ""
-    for s in report.ionSamples:
+    for s in (report.ionSamples or []):
         samples_text += f"- {s.sampleName}: Pre-test Standard {s.preStandard} ions/cm³, Post-test {s.postReading} ions/cm³\n"
+    if not samples_text:
+        samples_text = "None recorded / section excluded.\n"
 
     sensors_text = ""
-    for idx, sensor in enumerate(report.sensors, start=1):
+    for idx, sensor in enumerate(report.sensors or [], start=1):
         sensors_text += f"{idx}. {sensor.location} (MAC: {sensor.macId})\n"
+    if not sensors_text:
+        sensors_text = "None configured / section excluded.\n"
 
     return f"""
 You are an expert HVAC & Indoor Air Quality (IAQ) Commissioning Field Engineer at IntelliGreen Technologies.

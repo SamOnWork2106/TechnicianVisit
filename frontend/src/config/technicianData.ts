@@ -1,6 +1,36 @@
 import type { CommissioningForm } from "../types/commissioning";
 import type { PPMForm, PPMChecklistItem } from "../types/ppm";
 
+export const EMPTY_COMMISSIONING_DATA: CommissioningForm = {
+  description: "",
+  commissioningDate: new Date().toISOString().split("T")[0],
+  installer: {
+    installerName: "IntelliGreen Technologies Pvt. Ltd.",
+    contactPerson: "",
+    contactNo: "",
+    companyAddress: "Unit No. COS/3L/Office/17, M3M Cosmopolitan, Sector 66, Gurgaon, Haryana 122002",
+    telNo: "+91 124 4256862",
+    email: "info@intelligreentech.com",
+    managerEmail: "vikash@intelligreentech.com",
+  },
+  client: {
+    clientName: "",
+    project: "",
+    clientRepresentative: "",
+    location: "",
+    contactNo: "",
+    telNo: "NA",
+    email: "",
+    clientAddress: "",
+  },
+  ionSamples: [],
+  sensorDescription: "",
+  sensors: [],
+  bmsNotes: "",
+  submittedBy: "IntelliGreen Technologies Pvt Ltd",
+  aiSummary: "",
+};
+
 export const COMMISSIONING_EXAMPLE_DATA: CommissioningForm = {
   description: "Model Installed- PA 604-101 Nos, & IAQM-6 Nos.",
   commissioningDate: "2025-05-28",
@@ -95,12 +125,13 @@ export const DEFAULT_PPM_CHECKLIST_ITEMS: PPMChecklistItem[] = [
 
 export const INITIAL_PPM_DATA: PPMForm = {
   equipment: {
-    paDetails: "PA 604 - Central Plasma Air Purification Units - 101 Nos",
-    iaqMonitorDetails: "IAQM-6 Indoor Air Quality Monitoring Sensors - 6 Nos",
+    paDetails: "",
+    iaqMonitorDetails: "",
   },
   project: {
     client: "",
     location: "",
+    clientEmail: "",
   },
   ppmInfo: {
     lastPpm: "",

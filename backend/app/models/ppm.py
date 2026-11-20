@@ -4,18 +4,18 @@ from datetime import date
 
 
 class PPMEquipmentDetails(BaseModel):
-    paDetails: str = "PA 604 - Central Plasma Air Purification Units - 101 Nos"
-    iaqMonitorDetails: str = "IAQM-6 Indoor Air Quality Monitoring Sensors - 6 Nos"
+    paDetails: str = ""
+    iaqMonitorDetails: str = ""
 
 
 class PPMProjectDetails(BaseModel):
-    client: str = "Studiokon Ventures Private Limited / TCI"
-    location: str = "Plot No. 57, Sector-18, Gurgaon, Haryana"
+    client: str = ""
+    location: str = ""
     clientEmail: str = ""
 
 
 class PPMDetails(BaseModel):
-    lastPpm: str = "28.05.2025"
+    lastPpm: str = ""
     currentPpm: date
     managerEmail: EmailStr = "vikash@intelligreentech.com"
 
@@ -23,14 +23,14 @@ class PPMDetails(BaseModel):
 class PPMChecklistItem(BaseModel):
     sn: int
     checkList: str
-    condition: str
-    actionTaken: str
+    condition: str = ""
+    actionTaken: str = ""
 
 
 class PPMSignatures(BaseModel):
-    technicianName: str = "Lokendra Singh"
-    clientRepName: str = "Mr. Barun"
-    clientFeedback: str = "All equipment inspected and operating satisfactorily."
+    technicianName: str = ""
+    clientRepName: str = ""
+    clientFeedback: str = ""
 
 
 class PPMReportRequest(BaseModel):

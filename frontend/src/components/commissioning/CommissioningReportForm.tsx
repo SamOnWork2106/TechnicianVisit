@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { Download, Send, Sparkles, RotateCcw, FileText, CheckCircle2 } from "lucide-react";
+import { Download, Send, Sparkles, RotateCcw, FileText, CheckCircle2, Plus, Zap, Network } from "lucide-react";
 
 import type { CommissioningForm } from "../../types/commissioning";
-import { COMMISSIONING_EXAMPLE_DATA } from "../../config/technicianData";
+import { EMPTY_COMMISSIONING_DATA, COMMISSIONING_EXAMPLE_DATA } from "../../config/technicianData";
 import {
   submitCommissioningReport,
   downloadCommissioningPDF,
@@ -23,8 +23,10 @@ export default function CommissioningReportForm() {
   const { employee } = useAuth();
   const [submitting, setSubmitting] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [includeIonSection, setIncludeIonSection] = useState(true);
+  const [includeSensorsSection, setIncludeSensorsSection] = useState(true);
 
-  // Initialize with example data as requested
+  // Initialize with clean empty form by default (no prefilled sample data)
   const {
     register,
     control,
@@ -34,7 +36,7 @@ export default function CommissioningReportForm() {
     setValue,
     formState: { isDirty },
   } = useForm<CommissioningForm>({
-    defaultValues: COMMISSIONING_EXAMPLE_DATA,
+    defaultValues: EMPTY_COMMISSIONING_DATA,
   });
 
   // If technician logged in, update contact person
@@ -56,57 +58,56 @@ export default function CommissioningReportForm() {
   }, [isDirty, submitting]);
 
   const handleLoadExample = () => {
+    setIncludeIonSection(true);
+    setIncludeSensorsSection(true);
     reset(COMMISSIONING_EXAMPLE_DATA);
+    if (employee?.name) {
+      setValue("installer.contactPerson", employee.name);
+    }
     toast.success("Loaded TCI Commissioning example data.");
   };
 
   const handleClearForm = () => {
-    reset({
-      description: "",
-      commissioningDate: new Date().toISOString().split("T")[0],
-      installer: {
-        installerName: "IntelliGreen Technologies Pvt. Ltd.",
-        contactPerson: employee?.name || "",
-        contactNo: "",
-        companyAddress: "Unit No. COS/3L/Office/17, M3M Cosmopolitan, Sector 66, Gurgaon, Haryana 122002",
-        telNo: "+91 124 4256862",
-        email: "info@intelligreentech.com",
-        managerEmail: "vikash@intelligreentech.com",
-      },
-      client: {
-        clientName: "",
-        project: "",
-        clientRepresentative: "",
-        location: "",
-        contactNo: "",
-        telNo: "NA",
-        email: "",
-        clientAddress: "",
-      },
-      ionSamples: [
-        { sampleName: "Sample-1", preStandard: "50-250", postReading: "" },
-      ],
-      sensorDescription: "",
-      sensors: [
-        { location: "Floor 1", macId: "" },
-      ],
-      bmsNotes: "",
-      submittedBy: "IntelliGreen Technologies Pvt Ltd",
-      aiSummary: "",
-    });
+    setIncludeIonSection(true);
+    setIncludeSensorsSection(true);
+    reset(EMPTY_COMMISSIONING_DATA);
+    if (employee?.name) {
+      setValue("installer.contactPerson", employee.name);
+    }
     toast("Form cleared for fresh entry.");
   };
 
+  const handleDeleteIonSection = () => {
+    setValue("ionSamples", []);
+    setIncludeIonSection(false);
+    toast("Ion Concentration Test Results section removed.");
+  };
+
+  const handleDeleteSensorsSection = () => {
+    setValue("sensors", []);
+    setValue("sensorDescription", "");
+    setIncludeSensorsSection(false);
+    toast("IAQM Sensors & BMS Integration section removed.");
+  };
+
   const handleDownloadPDF = async () => {
-    const values = getValues();
-    if (!values.client.project) {
+    const rawValues = getValues();
+    if (!rawValues.client?.project) {
       toast.error("Please enter a Project Name before downloading PDF.");
       return;
     }
 
+    // Ensure deleted sections are strictly stripped from the payload
+    const sanitizedPayload: CommissioningForm = {
+      ...rawValues,
+      ionSamples: includeIonSection ? (rawValues.ionSamples || []) : [],
+      sensors: includeSensorsSection ? (rawValues.sensors || []) : [],
+      sensorDescription: includeSensorsSection ? (rawValues.sensorDescription || "") : "",
+    };
+
     try {
       setDownloading(true);
-      await downloadCommissioningPDF(values);
+      await downloadCommissioningPDF(sanitizedPayload);
       toast.success("Commissioning PDF generated & downloaded!");
     } catch (error) {
       console.error("PDF download error:", error);
@@ -119,7 +120,15 @@ export default function CommissioningReportForm() {
   const onSubmit = async (data: CommissioningForm) => {
     try {
       setSubmitting(true);
-      const res = await submitCommissioningReport(data);
+      // Ensure deleted sections are strictly stripped from the payload
+      const sanitizedPayload: CommissioningForm = {
+        ...data,
+        ionSamples: includeIonSection ? (data.ionSamples || []) : [],
+        sensors: includeSensorsSection ? (data.sensors || []) : [],
+        sensorDescription: includeSensorsSection ? (data.sensorDescription || "") : "",
+      };
+
+      const res = await submitCommissioningReport(sanitizedPayload);
       toast.success(res.message || "Commissioning Report submitted successfully!");
 
       navigate("/success", {
@@ -153,7 +162,7 @@ export default function CommissioningReportForm() {
             </h2>
           </div>
           <p className="text-xs text-slate-300 mt-1 max-w-xl">
-            Pre-loaded with sample commissioning records from project TCI. Review readings, inspect IAQM sensor MAC addresses, and submit report.
+            Fill in the commissioning records for the IAQ installation. Record ion readings, inspect sensor MAC addresses, and submit report. (Click &apos;Load Example Data&apos; if needed).
           </p>
         </div>
 
@@ -182,8 +191,78 @@ export default function CommissioningReportForm() {
         <CommissioningGeneralSection register={register} />
         <InstallerSection register={register} />
         <ClientSection register={register} />
-        <IonResultsSection control={control} register={register} />
-        <SensorsSection control={control} register={register} />
+
+        {/* Ion Results Section with Delete Section capability */}
+        {!includeIonSection ? (
+          <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                <Zap size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  Ion Concentration Test Results Section Excluded
+                </h3>
+                <p className="text-xs text-slate-500">
+                  This section has been deleted and will not be included in the report.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIncludeIonSection(true);
+                toast.success("Ion Concentration Test Results section restored.");
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer shrink-0"
+            >
+              <Plus size={14} />
+              <span>Add Ion Results Section</span>
+            </button>
+          </div>
+        ) : (
+          <IonResultsSection
+            control={control}
+            register={register}
+            onDeleteSection={handleDeleteIonSection}
+          />
+        )}
+
+        {/* Sensors & BMS Section with Delete Section capability */}
+        {!includeSensorsSection ? (
+          <div className="bg-slate-50 border-2 border-dashed border-slate-300 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-3 text-slate-600">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                <Network size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-800">
+                  IAQM Sensors & BMS Integration Section Excluded
+                </h3>
+                <p className="text-xs text-slate-500">
+                  This section has been deleted and will not be included in the report.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIncludeSensorsSection(true);
+                toast.success("IAQM Sensors & BMS Integration section restored.");
+              }}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer shrink-0"
+            >
+              <Plus size={14} />
+              <span>Add Sensors Section</span>
+            </button>
+          </div>
+        ) : (
+          <SensorsSection
+            control={control}
+            register={register}
+            onDeleteSection={handleDeleteSensorsSection}
+          />
+        )}
 
         {/* Action Controls */}
         <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 z-20">

@@ -312,130 +312,134 @@ def generate_commissioning_pdf(report: CommissioningReportRequest) -> Path:
     story.append(client_table)
     story.append(Spacer(1, 8))
 
-    # Result - Ion Concentration Table
-    result_data = [
-        [
-            Paragraph("<b>Result</b>", styles["TableCellCenterBold"]),
-            "",
-            "",
-        ],
-        [
-            Paragraph("<b>Ion Concentration</b>", styles["TableCellCenterBold"]),
-            "",
-            "",
-        ],
-        [
-            Paragraph("<b>Samples</b>", styles["TableCellCenterBold"]),
-            Paragraph("<b>Pre (Ions/cm³) (Standard)</b>", styles["TableCellCenterBold"]),
-            Paragraph("<b>Post (Ions/cm³)</b>", styles["TableCellCenterBold"]),
-        ],
-    ]
-
-    for sample in report.ionSamples:
-        result_data.append([
-            Paragraph(sample.sampleName, styles["TableCellCenter"]),
-            Paragraph(sample.preStandard, styles["TableCellCenter"]),
-            Paragraph(sample.postReading, styles["TableCellCenterBold"]),
-        ])
-
-    result_table = Table(
-        result_data,
-        colWidths=[doc.width * 0.34, doc.width * 0.33, doc.width * 0.33]
-    )
-    result_table.setStyle(
-        TableStyle([
-            ("BOX", (0, 0), (-1, -1), 0.75, BORDER_COLOR),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-            ("SPAN", (0, 0), (2, 0)),
-            ("SPAN", (0, 1), (2, 1)),
-            ("BACKGROUND", (0, 0), (2, 1), PRIMARY_GREEN),
-            ("TEXTCOLOR", (0, 0), (2, 1), colors.white),
-            ("BACKGROUND", (0, 2), (2, 2), LIGHT_BG),
-            ("TOPPADDING", (0, 0), (-1, -1), 3),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-            ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-        ])
-    )
-    story.append(result_table)
-    story.append(Spacer(1, 6))
-
-    # OEM Disclaimer
-    disclaimer_text = (
-        "<b>Note:</b> <i>Various studies and tests done by OEMs globally suggest that ion concentration above "
-        "1500 ions/cm³ is capable to destroy the hemagglutinin surface (Viral Protein, that triggers the infection) "
-        "and deactivate viruses including COVID-19.</i>"
-    )
-    story.append(Paragraph(disclaimer_text, styles["DisclaimerText"]))
-    story.append(Spacer(1, 10))
-
-    # Page 2 content / Sensors and Summary
-    story.append(PageBreak())
-
-    if LOGO_PATH.exists():
-        header_table_p2 = Table(
+    # Result - Ion Concentration Table (Render if samples exist)
+    if report.ionSamples and len(report.ionSamples) > 0:
+        result_data = [
             [
-                [
-                    RLImage(str(LOGO_PATH), width=115, height=36.2),
-                    Paragraph("<b>IAQM Sensors & Network Integration</b>", styles["ReportSubTitle"]),
-                ]
+                Paragraph("<b>Result</b>", styles["TableCellCenterBold"]),
+                "",
+                "",
             ],
-            colWidths=[125, doc.width - 125],
+            [
+                Paragraph("<b>Ion Concentration</b>", styles["TableCellCenterBold"]),
+                "",
+                "",
+            ],
+            [
+                Paragraph("<b>Samples</b>", styles["TableCellCenterBold"]),
+                Paragraph("<b>Pre (Ions/cm³) (Standard)</b>", styles["TableCellCenterBold"]),
+                Paragraph("<b>Post (Ions/cm³)</b>", styles["TableCellCenterBold"]),
+            ],
+        ]
+
+        for sample in report.ionSamples:
+            result_data.append([
+                Paragraph(sample.sampleName, styles["TableCellCenter"]),
+                Paragraph(sample.preStandard, styles["TableCellCenter"]),
+                Paragraph(sample.postReading, styles["TableCellCenterBold"]),
+            ])
+
+        result_table = Table(
+            result_data,
+            colWidths=[doc.width * 0.34, doc.width * 0.33, doc.width * 0.33]
         )
-        header_table_p2.setStyle(
+        result_table.setStyle(
             TableStyle([
-                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-                ("ALIGN", (0, 0), (0, 0), "LEFT"),
-                ("ALIGN", (1, 0), (1, 0), "CENTER"),
-                ("TOPPADDING", (0, 0), (-1, -1), 0),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("BOX", (0, 0), (-1, -1), 0.75, BORDER_COLOR),
+                ("INNERGRID", (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+                ("SPAN", (0, 0), (2, 0)),
+                ("SPAN", (0, 1), (2, 1)),
+                ("BACKGROUND", (0, 0), (2, 1), PRIMARY_GREEN),
+                ("TEXTCOLOR", (0, 0), (2, 1), colors.white),
+                ("BACKGROUND", (0, 2), (2, 2), LIGHT_BG),
+                ("TOPPADDING", (0, 0), (-1, -1), 3),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                ("ALIGN", (0, 0), (-1, -1), "CENTER"),
             ])
         )
-        story.append(header_table_p2)
-        story.append(Spacer(1, 8))
-    else:
-        story.append(
-            Paragraph("IntelliGreen TECHNOLOGIES — IAQM Sensors & Network Integration", styles["BrandHeader"])
+        story.append(result_table)
+        story.append(Spacer(1, 6))
+
+        # OEM Disclaimer
+        disclaimer_text = (
+            "<b>Note:</b> <i>Various studies and tests done by OEMs globally suggest that ion concentration above "
+            "1500 ions/cm³ is capable to destroy the hemagglutinin surface (Viral Protein, that triggers the infection) "
+            "and deactivate viruses including COVID-19.</i>"
         )
-        story.append(Spacer(1, 8))
+        story.append(Paragraph(disclaimer_text, styles["DisclaimerText"]))
+        story.append(Spacer(1, 10))
 
-    if report.sensorDescription and report.sensorDescription.strip():
-        sensor_intro = Paragraph(report.sensorDescription, styles["TableCell"])
-        story.append(sensor_intro)
-        story.append(Spacer(1, 8))
+    # Page 2 content / Sensors and Summary
+    has_sensors = bool(report.sensors or (report.sensorDescription and report.sensorDescription.strip()))
+    if has_sensors:
+        story.append(PageBreak())
 
-    sensor_rows = [
-        [
-            Paragraph("<b>#</b>", styles["TableCellCenterBold"]),
-            Paragraph("<b>Floor / Location</b>", styles["TableCellBold"]),
-            Paragraph("<b>Sensor MAC ID</b>", styles["TableCellBold"]),
-        ]
-    ]
-    for idx, s in enumerate(report.sensors, start=1):
-        sensor_rows.append([
-            Paragraph(str(idx), styles["TableCellCenter"]),
-            Paragraph(s.location, styles["TableCell"]),
-            Paragraph(s.macId, styles["TableCellBold"]),
-        ])
+        if LOGO_PATH.exists():
+            header_table_p2 = Table(
+                [
+                    [
+                        RLImage(str(LOGO_PATH), width=115, height=36.2),
+                        Paragraph("<b>IAQM Sensors & Network Integration</b>", styles["ReportSubTitle"]),
+                    ]
+                ],
+                colWidths=[125, doc.width - 125],
+            )
+            header_table_p2.setStyle(
+                TableStyle([
+                    ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                    ("ALIGN", (0, 0), (0, 0), "LEFT"),
+                    ("ALIGN", (1, 0), (1, 0), "CENTER"),
+                    ("TOPPADDING", (0, 0), (-1, -1), 0),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ])
+            )
+            story.append(header_table_p2)
+            story.append(Spacer(1, 8))
+        else:
+            story.append(
+                Paragraph("IntelliGreen TECHNOLOGIES — IAQM Sensors & Network Integration", styles["BrandHeader"])
+            )
+            story.append(Spacer(1, 8))
 
-    sensor_table = Table(
-        sensor_rows,
-        colWidths=[doc.width * 0.1, doc.width * 0.45, doc.width * 0.45]
-    )
-    sensor_table.setStyle(
-        TableStyle([
-            ("BOX", (0, 0), (-1, -1), 0.75, BORDER_COLOR),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, BORDER_COLOR),
-            ("BACKGROUND", (0, 0), (-1, 0), PRIMARY_GREEN),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("TOPPADDING", (0, 0), (-1, -1), 3),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
-            ("LEFTPADDING", (0, 0), (-1, -1), 6),
-        ])
-    )
-    story.append(sensor_table)
-    story.append(Spacer(1, 10))
+        if report.sensorDescription and report.sensorDescription.strip():
+            sensor_intro = Paragraph(report.sensorDescription, styles["TableCell"])
+            story.append(sensor_intro)
+            story.append(Spacer(1, 8))
+
+        if report.sensors and len(report.sensors) > 0:
+            sensor_rows = [
+                [
+                    Paragraph("<b>#</b>", styles["TableCellCenterBold"]),
+                    Paragraph("<b>Floor / Location</b>", styles["TableCellBold"]),
+                    Paragraph("<b>Sensor MAC ID</b>", styles["TableCellBold"]),
+                ]
+            ]
+            for idx, s in enumerate(report.sensors, start=1):
+                sensor_rows.append([
+                    Paragraph(str(idx), styles["TableCellCenter"]),
+                    Paragraph(s.location, styles["TableCell"]),
+                    Paragraph(s.macId, styles["TableCellBold"]),
+                ])
+
+            sensor_table = Table(
+                sensor_rows,
+                colWidths=[doc.width * 0.1, doc.width * 0.45, doc.width * 0.45]
+            )
+            sensor_table.setStyle(
+                TableStyle([
+                    ("BOX", (0, 0), (-1, -1), 0.75, BORDER_COLOR),
+                    ("INNERGRID", (0, 0), (-1, -1), 0.5, BORDER_COLOR),
+                    ("BACKGROUND", (0, 0), (-1, 0), PRIMARY_GREEN),
+                    ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                    ("TOPPADDING", (0, 0), (-1, -1), 3),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 6),
+                ])
+            )
+            story.append(sensor_table)
+            story.append(Spacer(1, 10))
 
     # Signatures
     sub_data = [

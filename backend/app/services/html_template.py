@@ -47,6 +47,49 @@ def generate_commissioning_html(report: CommissioningReportRequest) -> str:
         else ""
     )
 
+    ion_section_html = ""
+    if report.ionSamples and len(report.ionSamples) > 0:
+        ion_section_html = f"""
+        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Sample</th>
+                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
+                    <th style="text-align: center;">Post (Ions/cm³)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sample_rows}
+            </tbody>
+        </table>
+        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
+            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
+        </p>
+        """
+
+    sensors_section_html = ""
+    if report.sensors or (report.sensorDescription and report.sensorDescription.strip()):
+        sensors_section_html = f"""
+        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
+        {sensor_desc_html}
+        """
+        if report.sensors and len(report.sensors) > 0:
+            sensors_section_html += f"""
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%; text-align: center;">#</th>
+                    <th>Location / Floor</th>
+                    <th>Sensor MAC ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sensor_rows}
+            </tbody>
+        </table>
+        """
+
     return f"""
 <!DOCTYPE html>
 <html>
@@ -132,37 +175,8 @@ td {{
             <p style="margin: 4px 0; font-size: 13px;"><b>Submitted At:</b> {submitted_at}</p>
         </div>
 
-        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align: center;">Sample</th>
-                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
-                    <th style="text-align: center;">Post (Ions/cm³)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sample_rows}
-            </tbody>
-        </table>
-        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
-            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
-        </p>
-
-        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
-        {sensor_desc_html}
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%; text-align: center;">#</th>
-                    <th>Location / Floor</th>
-                    <th>Sensor MAC ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sensor_rows}
-            </tbody>
-        </table>
+        {ion_section_html}
+        {sensors_section_html}
     </div>
 
     <div class="footer">
@@ -194,6 +208,49 @@ def generate_ppm_html(report: PPMReportRequest) -> str:
             <td style="padding: 8px; border: 1px solid #cbd5e1;">{condition_badge}</td>
             <td style="padding: 8px; border: 1px solid #cbd5e1; font-size: 12px;">{_esc(item.actionTaken) or '-'}</td>
         </tr>
+        """
+
+    ion_section_html = ""
+    if report.ionSamples and len(report.ionSamples) > 0:
+        ion_section_html = f"""
+        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Sample</th>
+                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
+                    <th style="text-align: center;">Post (Ions/cm³)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sample_rows}
+            </tbody>
+        </table>
+        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
+            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
+        </p>
+        """
+
+    sensors_section_html = ""
+    if report.sensors or (report.sensorDescription and report.sensorDescription.strip()):
+        sensors_section_html = f"""
+        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
+        {sensor_desc_html}
+        """
+        if report.sensors and len(report.sensors) > 0:
+            sensors_section_html += f"""
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%; text-align: center;">#</th>
+                    <th>Location / Floor</th>
+                    <th>Sensor MAC ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sensor_rows}
+            </tbody>
+        </table>
         """
 
     return f"""
@@ -339,6 +396,49 @@ def generate_html(report: ReportRequest) -> str:
             <td>{_esc(visit.nextAction)}</td>
         </tr>
         """
+    ion_section_html = ""
+    if report.ionSamples and len(report.ionSamples) > 0:
+        ion_section_html = f"""
+        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="text-align: center;">Sample</th>
+                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
+                    <th style="text-align: center;">Post (Ions/cm³)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sample_rows}
+            </tbody>
+        </table>
+        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
+            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
+        </p>
+        """
+
+    sensors_section_html = ""
+    if report.sensors or (report.sensorDescription and report.sensorDescription.strip()):
+        sensors_section_html = f"""
+        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
+        {sensor_desc_html}
+        """
+        if report.sensors and len(report.sensors) > 0:
+            sensors_section_html += f"""
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 10%; text-align: center;">#</th>
+                    <th>Location / Floor</th>
+                    <th>Sensor MAC ID</th>
+                </tr>
+            </thead>
+            <tbody>
+                {sensor_rows}
+            </tbody>
+        </table>
+        """
+
     return f"""
 <!DOCTYPE html>
 <html>

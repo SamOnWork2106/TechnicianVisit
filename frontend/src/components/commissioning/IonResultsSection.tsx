@@ -6,6 +6,7 @@ import { Zap, Plus, Trash2, Info, Edit3, X, Check, Activity } from "lucide-react
 interface Props {
   control: Control<CommissioningForm>;
   register: UseFormRegister<CommissioningForm>;
+  onDeleteSection?: () => void;
 }
 
 interface SampleData {
@@ -14,7 +15,7 @@ interface SampleData {
   postReading: string;
 }
 
-export default function IonResultsSection({ control, register }: Props) {
+export default function IonResultsSection({ control, register, onDeleteSection }: Props) {
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "ionSamples",
@@ -92,14 +93,28 @@ export default function IonResultsSection({ control, register }: Props) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={openAddModal}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
-        >
-          <Plus size={15} />
-          <span>Add Sample Point</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {onDeleteSection && (
+            <button
+              type="button"
+              onClick={onDeleteSection}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
+              title="Delete this entire section"
+            >
+              <Trash2 size={14} className="text-rose-600" />
+              <span>Delete Section</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={openAddModal}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
+          >
+            <Plus size={15} />
+            <span>Add Sample Point</span>
+          </button>
+        </div>
       </div>
 
       {/* Hidden inputs to guarantee React Hook Form registers all fields for submission */}
@@ -115,72 +130,83 @@ export default function IonResultsSection({ control, register }: Props) {
 
       {/* MOBILE-FIRST VIEW: Responsive Cards (prevents cramped/hidden table text on phones) */}
       <div className="block md:hidden space-y-3">
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            onClick={() => openEditModal(index)}
-            className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-teal-50/40 hover:border-teal-300 transition cursor-pointer relative shadow-2xs"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center">
-                  {index + 1}
-                </span>
-                <span className="font-bold text-sm text-slate-800">
-                  {field.sampleName || `Sample-${index + 1}`}
-                </span>
-              </div>
+        {fields.length === 0 ? (
+          <div className="p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
+            <p className="text-xs font-medium mb-2">No ion concentration test samples recorded.</p>
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition"
+            >
+              <Plus size={14} /> Add Sample Point
+            </button>
+          </div>
+        ) : (
+          fields.map((field, index) => (
+            <div
+              key={field.id}
+              onClick={() => openEditModal(index)}
+              className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-teal-50/40 hover:border-teal-300 transition cursor-pointer relative shadow-2xs"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center">
+                    {index + 1}
+                  </span>
+                  <span className="font-bold text-sm text-slate-800">
+                    {field.sampleName || `Sample-${index + 1}`}
+                  </span>
+                </div>
 
-              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => openEditModal(index)}
-                  className="p-1.5 text-teal-700 hover:bg-teal-100 rounded-lg transition"
-                  title="Edit in top window"
-                >
-                  <Edit3 size={15} />
-                </button>
-                {fields.length > 1 && (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(index)}
+                    className="p-1.5 text-teal-700 hover:bg-teal-100 rounded-lg transition"
+                    title="Edit in top window"
+                  >
+                    <Edit3 size={15} />
+                  </button>
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                     title="Delete sample"
                   >
                     <Trash2 size={15} />
                   </button>
-                )}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                  Pre (Standard)
-                </span>
-                <span className="font-mono text-slate-700 font-medium">
-                  {field.preStandard || "50-250"} ions/cm³
-                </span>
+                </div>
               </div>
 
-              <div>
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                  Post (Active Density)
-                </span>
-                {field.postReading ? (
-                  <span className="inline-block px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-800 text-xs">
-                    {field.postReading} ions/cm³
+              <div className="grid grid-cols-2 gap-2 text-xs pt-1 border-t border-slate-200/60">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    Pre (Standard)
                   </span>
-                ) : (
-                  <span className="text-rose-500 italic font-medium flex items-center gap-1">
-                    <span>Tap to enter reading</span>
-                    <Edit3 size={12} />
+                  <span className="font-mono text-slate-700 font-medium">
+                    {field.preStandard || "50-250"} ions/cm³
                   </span>
-                )}
+                </div>
+
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-400 block">
+                    Post (Active Density)
+                  </span>
+                  {field.postReading ? (
+                    <span className="inline-block px-2 py-0.5 rounded font-mono font-bold bg-emerald-100 text-emerald-800 text-xs">
+                      {field.postReading} ions/cm³
+                    </span>
+                  ) : (
+                    <span className="text-rose-500 italic font-medium flex items-center gap-1">
+                      <span>Tap to enter reading</span>
+                      <Edit3 size={12} />
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* DESKTOP VIEW: Clean Table on larger screens */}
@@ -203,55 +229,70 @@ export default function IonResultsSection({ control, register }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white border border-slate-200 border-t-0">
-            {fields.map((field, index) => (
-              <tr key={field.id} className="hover:bg-slate-50 transition">
-                <td className="p-3 px-4 font-medium text-slate-800">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs flex items-center justify-center font-bold">
-                      {index + 1}
-                    </span>
-                    <span>{field.sampleName || `Sample-${index + 1}`}</span>
-                  </div>
-                </td>
-
-                <td className="p-3 px-4 text-slate-600 font-mono">
-                  {field.preStandard || "50-250"}
-                </td>
-
-                <td className="p-3 px-4">
-                  {field.postReading ? (
-                    <span className="inline-block px-2.5 py-1 rounded font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs">
-                      {field.postReading} ions/cm³
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 italic text-xs">Not recorded</span>
-                  )}
-                </td>
-
-                <td className="p-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
+            {fields.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-slate-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p className="text-xs font-medium">No ion concentration test samples recorded.</p>
                     <button
                       type="button"
-                      onClick={() => openEditModal(index)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition cursor-pointer"
+                      onClick={openAddModal}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-teal-700 hover:text-teal-900 underline cursor-pointer"
                     >
-                      <Edit3 size={12} />
-                      <span>Edit</span>
+                      <Plus size={14} /> Add your first sample point
                     </button>
-                    {fields.length > 1 && (
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              fields.map((field, index) => (
+                <tr key={field.id} className="hover:bg-slate-50 transition">
+                  <td className="p-3 px-4 font-medium text-slate-800">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-600 text-xs flex items-center justify-center font-bold">
+                        {index + 1}
+                      </span>
+                      <span>{field.sampleName || `Sample-${index + 1}`}</span>
+                    </div>
+                  </td>
+
+                  <td className="p-3 px-4 text-slate-600 font-mono">
+                    {field.preStandard || "50-250"}
+                  </td>
+
+                  <td className="p-3 px-4">
+                    {field.postReading ? (
+                      <span className="inline-block px-2.5 py-1 rounded font-mono font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs">
+                        {field.postReading} ions/cm³
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">Not recorded</span>
+                    )}
+                  </td>
+
+                  <td className="p-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(index)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition cursor-pointer"
+                      >
+                        <Edit3 size={12} />
+                        <span>Edit</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
                         title="Remove sample row"
                       >
                         <Trash2 size={15} />
                       </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

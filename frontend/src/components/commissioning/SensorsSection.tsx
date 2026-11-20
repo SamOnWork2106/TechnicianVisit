@@ -6,6 +6,7 @@ import { Network, Plus, Trash2, Edit3, X, Check, Cpu } from "lucide-react";
 interface Props {
   control: Control<CommissioningForm>;
   register: UseFormRegister<CommissioningForm>;
+  onDeleteSection?: () => void;
 }
 
 interface SensorData {
@@ -13,7 +14,7 @@ interface SensorData {
   macId: string;
 }
 
-export default function SensorsSection({ control, register }: Props) {
+export default function SensorsSection({ control, register, onDeleteSection }: Props) {
   const { fields, append, remove, update } = useFieldArray({
     control,
     name: "sensors",
@@ -82,14 +83,28 @@ export default function SensorsSection({ control, register }: Props) {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={openAddModal}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
-        >
-          <Plus size={15} />
-          <span>Add Sensor</span>
-        </button>
+        <div className="flex items-center gap-2">
+          {onDeleteSection && (
+            <button
+              type="button"
+              onClick={onDeleteSection}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
+              title="Delete this entire section"
+            >
+              <Trash2 size={14} className="text-rose-600" />
+              <span>Delete Section</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={openAddModal}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg shadow-2xs transition cursor-pointer active:scale-95"
+          >
+            <Plus size={15} />
+            <span>Add Sensor</span>
+          </button>
+        </div>
       </div>
 
       {/* Sensor Installation Description */}
@@ -117,61 +132,72 @@ export default function SensorsSection({ control, register }: Props) {
 
       {/* MOBILE-FIRST VIEW: Responsive Cards */}
       <div className="block md:hidden space-y-3 mb-4">
-        {fields.map((field, index) => (
-          <div
-            key={field.id}
-            onClick={() => openEditModal(index)}
-            className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-teal-50/40 hover:border-teal-300 transition cursor-pointer shadow-2xs"
-          >
-            <div className="flex items-start justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center">
-                  {index + 1}
-                </span>
-                <span className="font-bold text-sm text-slate-800">
-                  {field.location || `Floor ${index + 1}`}
-                </span>
-              </div>
+        {fields.length === 0 ? (
+          <div className="p-6 text-center text-slate-500 bg-slate-50 rounded-xl border border-slate-200">
+            <p className="text-xs font-medium mb-2">No IAQM sensors added yet.</p>
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-teal-800 bg-teal-50 hover:bg-teal-100 border border-teal-300 rounded-lg transition"
+            >
+              <Plus size={14} /> Add Sensor
+            </button>
+          </div>
+        ) : (
+          fields.map((field, index) => (
+            <div
+              key={field.id}
+              onClick={() => openEditModal(index)}
+              className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/60 hover:bg-teal-50/40 hover:border-teal-300 transition cursor-pointer shadow-2xs"
+            >
+              <div className="flex items-start justify-between gap-2 mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="w-6 h-6 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center">
+                    {index + 1}
+                  </span>
+                  <span className="font-bold text-sm text-slate-800">
+                    {field.location || `Floor ${index + 1}`}
+                  </span>
+                </div>
 
-              <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => openEditModal(index)}
-                  className="p-1.5 text-teal-700 hover:bg-teal-100 rounded-lg transition"
-                  title="Edit sensor"
-                >
-                  <Edit3 size={15} />
-                </button>
-                {fields.length > 1 && (
+                <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                  <button
+                    type="button"
+                    onClick={() => openEditModal(index)}
+                    className="p-1.5 text-teal-700 hover:bg-teal-100 rounded-lg transition"
+                    title="Edit sensor"
+                  >
+                    <Edit3 size={15} />
+                  </button>
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
                     title="Delete sensor"
                   >
                     <Trash2 size={15} />
                   </button>
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
+                <span className="text-[10px] uppercase font-bold text-slate-400">
+                  Sensor MAC ID
+                </span>
+                {field.macId ? (
+                  <span className="font-mono font-bold bg-slate-200/80 text-slate-800 px-2.5 py-0.5 rounded text-xs tracking-wider">
+                    {field.macId}
+                  </span>
+                ) : (
+                  <span className="text-rose-500 italic text-xs font-medium flex items-center gap-1">
+                    <span>Tap to enter MAC ID</span>
+                    <Edit3 size={12} />
+                  </span>
                 )}
               </div>
             </div>
-
-            <div className="pt-2 border-t border-slate-200/60 flex items-center justify-between text-xs">
-              <span className="text-[10px] uppercase font-bold text-slate-400">
-                Sensor MAC ID
-              </span>
-              {field.macId ? (
-                <span className="font-mono font-bold bg-slate-200/80 text-slate-800 px-2.5 py-0.5 rounded text-xs tracking-wider">
-                  {field.macId}
-                </span>
-              ) : (
-                <span className="text-rose-500 italic text-xs font-medium flex items-center gap-1">
-                  <span>Tap to enter MAC ID</span>
-                  <Edit3 size={12} />
-                </span>
-              )}
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* DESKTOP VIEW: Table on larger screens */}
@@ -194,50 +220,65 @@ export default function SensorsSection({ control, register }: Props) {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 bg-white border border-slate-200 border-t-0">
-            {fields.map((field, index) => (
-              <tr key={field.id} className="hover:bg-slate-50 transition">
-                <td className="p-3 text-center font-bold text-slate-500">
-                  {index + 1}
-                </td>
-
-                <td className="p-3 px-4 font-medium text-slate-800">
-                  {field.location || `Floor ${index + 1}`}
-                </td>
-
-                <td className="p-3 px-4">
-                  {field.macId ? (
-                    <span className="font-mono font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded text-xs tracking-wider border border-slate-200">
-                      {field.macId}
-                    </span>
-                  ) : (
-                    <span className="text-slate-400 italic text-xs">No MAC entered</span>
-                  )}
-                </td>
-
-                <td className="p-3 text-center">
-                  <div className="flex items-center justify-center gap-1.5">
+            {fields.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="p-8 text-center text-slate-500">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <p className="text-xs font-medium">No IAQM sensors added yet.</p>
                     <button
                       type="button"
-                      onClick={() => openEditModal(index)}
-                      className="inline-flex items-center gap-1 px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition cursor-pointer"
+                      onClick={openAddModal}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-teal-700 hover:text-teal-900 underline cursor-pointer"
                     >
-                      <Edit3 size={12} />
-                      <span>Edit</span>
+                      <Plus size={14} /> Add your first sensor
                     </button>
-                    {fields.length > 1 && (
+                  </div>
+                </td>
+              </tr>
+            ) : (
+              fields.map((field, index) => (
+                <tr key={field.id} className="hover:bg-slate-50 transition">
+                  <td className="p-3 text-center font-bold text-slate-500">
+                    {index + 1}
+                  </td>
+
+                  <td className="p-3 px-4 font-medium text-slate-800">
+                    {field.location || `Floor ${index + 1}`}
+                  </td>
+
+                  <td className="p-3 px-4">
+                    {field.macId ? (
+                      <span className="font-mono font-bold bg-slate-100 text-slate-800 px-2.5 py-1 rounded text-xs tracking-wider border border-slate-200">
+                        {field.macId}
+                      </span>
+                    ) : (
+                      <span className="text-slate-400 italic text-xs">No MAC entered</span>
+                    )}
+                  </td>
+
+                  <td className="p-3 text-center">
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => openEditModal(index)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded bg-teal-50 hover:bg-teal-100 text-teal-800 text-xs font-semibold border border-teal-200 transition cursor-pointer"
+                      >
+                        <Edit3 size={12} />
+                        <span>Edit</span>
+                      </button>
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
                         title="Remove sensor row"
                       >
                         <Trash2 size={15} />
                       </button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

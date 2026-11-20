@@ -347,16 +347,14 @@ export default function PPMChecklistSection({ control, register }: Props) {
                 >
                   <Edit3 size={15} />
                 </button>
-                {fields.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => remove(index)}
-                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg transition"
-                    title="Delete item"
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => remove(index)}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition cursor-pointer"
+                  title="Delete item"
+                >
+                  <Trash2 size={15} />
+                </button>
               </div>
             </div>
 
@@ -436,16 +434,14 @@ export default function PPMChecklistSection({ control, register }: Props) {
                       <Edit3 size={12} />
                       <span>Edit</span>
                     </button>
-                    {fields.length > 1 && (
                       <button
                         type="button"
                         onClick={() => remove(index)}
-                        className="p-1 text-slate-400 hover:text-rose-600 rounded transition cursor-pointer"
+                        className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition cursor-pointer"
                         title="Delete item"
                       >
                         <Trash2 size={15} />
                       </button>
-                    )}
                   </div>
                 </td>
               </tr>
