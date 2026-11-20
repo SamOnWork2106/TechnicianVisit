@@ -210,49 +210,6 @@ def generate_ppm_html(report: PPMReportRequest) -> str:
         </tr>
         """
 
-    ion_section_html = ""
-    if report.ionSamples and len(report.ionSamples) > 0:
-        ion_section_html = f"""
-        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align: center;">Sample</th>
-                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
-                    <th style="text-align: center;">Post (Ions/cm³)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sample_rows}
-            </tbody>
-        </table>
-        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
-            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
-        </p>
-        """
-
-    sensors_section_html = ""
-    if report.sensors or (report.sensorDescription and report.sensorDescription.strip()):
-        sensors_section_html = f"""
-        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
-        {sensor_desc_html}
-        """
-        if report.sensors and len(report.sensors) > 0:
-            sensors_section_html += f"""
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%; text-align: center;">#</th>
-                    <th>Location / Floor</th>
-                    <th>Sensor MAC ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sensor_rows}
-            </tbody>
-        </table>
-        """
-
     return f"""
 <!DOCTYPE html>
 <html>
@@ -396,48 +353,6 @@ def generate_html(report: ReportRequest) -> str:
             <td>{_esc(visit.nextAction)}</td>
         </tr>
         """
-    ion_section_html = ""
-    if report.ionSamples and len(report.ionSamples) > 0:
-        ion_section_html = f"""
-        <h3 style="margin: 20px 0 8px 0; font-size: 16px; color: #0f766e;">Ion Concentration Test Results</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align: center;">Sample</th>
-                    <th style="text-align: center;">Pre (Ions/cm³) (Standard)</th>
-                    <th style="text-align: center;">Post (Ions/cm³)</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sample_rows}
-            </tbody>
-        </table>
-        <p style="font-size: 11px; color: #64748b; font-style: italic; margin-top: 6px;">
-            * OEM studies confirm ion concentrations &gt;1500 ions/cm³ effectively destroy viral protein surfaces including COVID-19.
-        </p>
-        """
-
-    sensors_section_html = ""
-    if report.sensors or (report.sensorDescription and report.sensorDescription.strip()):
-        sensors_section_html = f"""
-        <h3 style="margin: 25px 0 8px 0; font-size: 16px; color: #0f766e;">IAQM Sensors & BMS Integration</h3>
-        {sensor_desc_html}
-        """
-        if report.sensors and len(report.sensors) > 0:
-            sensors_section_html += f"""
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 10%; text-align: center;">#</th>
-                    <th>Location / Floor</th>
-                    <th>Sensor MAC ID</th>
-                </tr>
-            </thead>
-            <tbody>
-                {sensor_rows}
-            </tbody>
-        </table>
-        """
 
     return f"""
 <!DOCTYPE html>
@@ -470,6 +385,7 @@ th {{
 <p><b>Employee ID:</b> {_esc(report.employee.employeeId)}</p>
 <p><b>Employee Name:</b> {_esc(report.employee.employeeName)}</p>
 <p><b>Date:</b> {_esc(report.employee.date)}</p>
+<p><b>City:</b> {_esc(report.employee.city)}</p>
 <p><b>Submitted At:</b> {submitted_at}</p>
 
 <table>
@@ -485,9 +401,12 @@ th {{
 {visit_rows}
 </table>
 
-<p><b>Key Win:</b> {_esc(report.employee.keyWin)}</p>
-<p><b>Challenges:</b> {_esc(report.employee.challenges)}</p>
-<p><b>Other Remarks:</b> {_esc(report.employee.otherRemarks)}</p>
+<p><b>Key Win:</b> {_esc(report.daySummary.keyWin)}</p>
+<p><b>Challenges:</b> {_esc(report.daySummary.challenges)}</p>
+<p><b>Other Remarks:</b> {_esc(report.daySummary.otherRemarks)}</p>
+
+<h3>AI Summary</h3>
+<p>{_esc(report.aiSummary)}</p>
 
 </body>
 </html>
